@@ -10,6 +10,8 @@ interface AirplaneSpecifications{
     fun increaseCapacity()
 }
 
+//val test: ()->()->Unit = {{ println("test") }}
+
 sealed class Transport(val transportType:String, val price:Int, open val capacity:Int){
 
 
@@ -18,8 +20,10 @@ sealed class Transport(val transportType:String, val price:Int, open val capacit
     }
 
 
-    abstract class Automobile(price: Int, capacity: Int, var collor:String, var maxSpeed:Int, var horsepower:Int): Transport("Automobile", price, capacity)
-    abstract class Airplane(price: Int, capacity: Int): Transport("Airplane", price, capacity)
+    abstract class Automobile(price: Int, capacity: Int, var maxSpeed:Int, var horsepower:Int): Transport("Automobile", price, capacity){
+        var collor:String = "Black"
+    }
+    abstract class Airplane(price: Int, capacity: Int): Transport("Airplane", price, capacity), AirplaneSpecifications
     abstract class Ship(capacity: Int): Transport("Ship", 1_000_000_000, capacity)
 
 
@@ -58,14 +62,14 @@ class CargoShip(var cargoType:String = "Oil", var cargoCapacity:Int = 250_000): 
 
 }
 
-class Boeing(override var capacity: Int = 550): Transport.Airplane(120_000_000, capacity), AirplaneSpecifications{
+class Boeing(override var capacity: Int = 550): Transport.Airplane(120_000_000, capacity){
     override fun increaseCapacity() {
         capacity+=100
         println("You've shrunk the legroom and now the plane can fit $capacity people!")
     }
 
 }
-class AirbusA380(override var capacity: Int = 850): Transport.Airplane(480_000_000, capacity), AirplaneSpecifications{
+class AirbusA380(override var capacity: Int = 850): Transport.Airplane(480_000_000, capacity){
     override fun increaseCapacity() {
         capacity+=150
         println("You've shrunk the legroom and now the plane can fit $capacity people!")
@@ -73,7 +77,7 @@ class AirbusA380(override var capacity: Int = 850): Transport.Airplane(480_000_0
 
 }
 
-class BMW() : Transport.Automobile(50_000, 3, "Black", 280, 340), AutoSpecifications{
+class BMW() : Transport.Automobile(50_000, 3,  280, 340), AutoSpecifications{
 
     override fun tuning() {
         maxSpeed+=40
@@ -90,7 +94,9 @@ class BMW() : Transport.Automobile(50_000, 3, "Black", 280, 340), AutoSpecificat
 
 
 }
-class Mercedes() : Transport.Automobile(60_000, 5, "Black", 220, 170), AutoSpecifications{
+class Mercedes() : Transport.Automobile(60_000, 5,  220, 170), AutoSpecifications{
+
+
 
     override fun tuning() {
         maxSpeed+=30
@@ -105,7 +111,7 @@ class Mercedes() : Transport.Automobile(60_000, 5, "Black", 220, 170), AutoSpeci
 
     }
 }
-
+class Lada(): Transport.Automobile(10_000, 4, 140, 90){}
 
 //singleton
 object TransportCompany{
@@ -225,8 +231,8 @@ fun main() {
                     "BMW" -> automobile = BMW()
                     "Mercedes" -> automobile = Mercedes()
                     else -> {
-                        println("I think you'll like BMW...")
-                        automobile = BMW()
+                        println("I think you'll like Lada...")
+                        automobile = Lada()
 
                     }
                 }
@@ -235,6 +241,7 @@ fun main() {
                 if(input == "YES") {
                     if(automobile is BMW)automobile.tuning()
                     else if(automobile is Mercedes)automobile.tuning()
+                    else println("I looked... Unfortunately, nothing will work")
                 }
                 println("Great! I'm sending a order: \nprice ${automobile.price} $\n capacity ${automobile.capacity} people")
                 TransportCompany.transport.add(automobile)
@@ -249,7 +256,28 @@ fun main() {
     }
     println("Let's hope that the boss will like the list that we have compiled!")
     for (i in TransportCompany.transport) {
-        println(i.transportType)
+        when(i){
+            is Train -> {
+                println("\n ${i.transportType}:\n\tPrice ${i.price}$\n\tCapacity ${i.capacity}\n\tTrain carriage ${i.train_carriage}\n")
+            }
+            is Transport.Automobile -> {
+                println("\n ${i.transportType}:\n\tPrice ${i.price}\$\n\tCapacity ${i.capacity}\n\tMax speed ${i.maxSpeed} km/h\n\tHorsepower ${i.horsepower}\n\tCollor ${i.collor}\n")
+            }
+            is Transport.Airplane -> {
+                println("\n ${i.transportType}:\n\tPrice ${i.price}\$\n\tCapacity ${i.capacity}\n")
+            }
+            is Transport.Ship ->{
+                when(i){
+                    is CruiseShip -> {
+                        println("\n ${i.transportType}:\n\tPrice ${i.price}\$\n\tCapacity ${i.capacity}\n")
+                    }
+                    is CargoShip -> {
+                        println("\n ${i.transportType}:\n\tPrice ${i.price}\$\n\tCargo type ${i.cargoType}\n\tCargo capacity ${i.cargoCapacity} t")
+                    }
+                }
+            }
+        }
+//        println(i.transportType)
     }
     println("We spent ${TransportCompany.expenses} $")
 }
